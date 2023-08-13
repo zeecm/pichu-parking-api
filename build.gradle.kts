@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.0"
     application
 }
 
@@ -15,6 +16,7 @@ dependencies {
     val mockkVersion = "1.13.5"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-test-dispatcher:$ktorVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")

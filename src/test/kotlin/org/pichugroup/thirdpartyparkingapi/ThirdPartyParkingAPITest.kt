@@ -44,4 +44,43 @@ class URAParkingAPITest {
             assertEquals("mocked_token", token)
         }
     }
+
+    @Test
+    fun testGetParkingLots(){
+        runBlocking {
+            val mockEngine = MockEngine { _ ->
+                respond(
+                    content = ByteReadChannel("""{
+                                                  "Status": "Success",
+                                                  "Message": "",
+                                                  "Result": [{
+                                                      "lotsAvailable": "0",
+                                                      "lotType": "M",
+                                                      "carparkNo": "N0006",
+                                                      "geometries": [{
+                                                        "coordinates": "28956.4609, 29088.2522"
+                                                      }]
+                                                    },
+                                                    {
+                                                      "lotsAvailable": "2",
+                                                      "lotType": "M",
+                                                      "carparkNo": "S0108",
+                                                      "geometries": [{
+                                                        "coordinates": "29930.895, 33440.7746"
+                                                      }]
+                                                    }
+                                                  ]
+                                                }"""),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            }
+            val expectedParkingLots = listOf(URAParkingLotData(lotsAvailable = "0", lotType = "M", carparkNo = "N0006", geometries = listOf(URACoordinates(coordinates = "28956.4609, 29088.2522"))),
+                URAParkingLotData(lotsAvailable = "2", lotType = "M", carparkNo = "S0108", geometries = listOf(URACoordinates(coordinates = "29930.895, 33440.7746")))
+            )
+            val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
+            val parkingLots: URAParkingLotResponse = api.getParkingLots()
+            assertEquals(expectedParkingLots, parkingLots.result)
+        }
+    }
 }

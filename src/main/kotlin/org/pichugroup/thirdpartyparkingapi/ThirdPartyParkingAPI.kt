@@ -1,5 +1,7 @@
 package org.pichugroup.thirdpartyparkingapi
 
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
@@ -47,13 +49,36 @@ abstract class ThirdPartyParkingAPI(private val httpClient: HttpClient? = null, 
                 }
             }
         }
+        if (response.status.value != 200) {
+            throw Exception("Failed to get OK response from API")
+        }
         return response
     }
 }
 
+data class URAParkingLotResponse(
+    @SerializedName("Status") var status: String,
+    @SerializedName("Message") var message: String,
+    @SerializedName("Result") var result: List<URAParkingLotData>,
+)
+
+data class URAParkingLotData(
+    @SerializedName("lotsAvailable") var lotsAvailable: String,
+    @SerializedName("lotType") var lotType: String,
+    @SerializedName("carparkNo") var carparkNo: String,
+    @SerializedName("geometries") var geometries: List<URACoordinates>
+)
+
+data class URACoordinates(
+    @SerializedName("coordinates") var coordinates: String,
+)
 
 open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accessKey: String) : ThirdPartyParkingAPI(httpClient=httpClient,engine=engine) {
-
+    private val defaultHeaders = mapOf(
+        "AccessKey" to accessKey,
+        "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+        "x-requested-with" to "XMLHttpRequest",
+    )
     suspend fun getToken(): String {
         val httpResponse: HttpResponse = this.makeAPICallToGetToken()
         val responseMap: Map<String, Any> = this.convertHttpResponseToMap(httpResponse)
@@ -61,17 +86,22 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
         return token.toString()
     }
 
+    suspend fun getParkingLots(): URAParkingLotResponse {
+        val token: String = this.getToken()
+        val augmentedHeader: MutableMap<String, String> = this.defaultHeaders.toMutableMap()
+        augmentedHeader["Token"] = token
+
+        val parkingLotResponse: HttpResponse = this.makeAPICall(PARKING_LOTS_ENDPOINT, headers = augmentedHeader)
+        return this.deserializeParkingLotResponse(parkingLotResponse.body())
+    }
+
+    private fun deserializeParkingLotResponse(parkingLotJsonText: String): URAParkingLotResponse {
+        val gson = Gson()
+        return gson.fromJson(parkingLotJsonText, URAParkingLotResponse::class.java)
+    }
+
     private suspend fun makeAPICallToGetToken(): HttpResponse {
-        val headers = mapOf(
-            "AccessKey" to accessKey,
-            "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
-            "x-requested-with" to "XMLHttpRequest",
-        )
-        val response: HttpResponse = this.makeAPICall(endpoint = TOKEN_ENDPOINT, headers = headers)
-        if (response.status.value != 200) {
-            throw Exception("Failed to authenticate with URA's API")
-        }
-        return response
+        return makeAPICall(endpoint = TOKEN_ENDPOINT, headers = defaultHeaders)
     }
 
     private suspend fun convertHttpResponseToMap(httpResponse: HttpResponse): Map<String, Any> {

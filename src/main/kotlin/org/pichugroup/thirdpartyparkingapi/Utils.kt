@@ -1,6 +1,7 @@
 package org.pichugroup.thirdpartyparkingapi
 
 import com.google.gson.Gson
+import java.lang.reflect.Type
 
 internal fun textJsonToMap(text: String): Map<String, Any> {
     val gson = Gson()
