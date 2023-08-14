@@ -3,9 +3,9 @@ package org.pichugroup.thirdpartyparkingapi
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.coroutines.runBlocking
 
 class UtilityTest {
 
@@ -30,7 +30,7 @@ class URAParkingAPITest {
     private val uraAccessKey: String = System.getenv("URA_ACCESS_KEY") ?: ""
 
     @Test
-    fun testGetToken(){
+    fun testGetToken() {
         runBlocking {
             val mockEngine = MockEngine { _ ->
                 respond(
@@ -46,11 +46,12 @@ class URAParkingAPITest {
     }
 
     @Test
-    fun testGetParkingLots(){
+    fun testGetParkingLots() {
         runBlocking {
             val mockEngine = MockEngine { _ ->
                 respond(
-                    content = ByteReadChannel("""{
+                    content = ByteReadChannel(
+                        """{
                                                   "Status": "Success",
                                                   "Message": "",
                                                   "Result": [{
@@ -70,17 +71,70 @@ class URAParkingAPITest {
                                                       }]
                                                     }
                                                   ]
-                                                }"""),
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                                                }"""
+                    ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
             }
-            val expectedParkingLots = listOf(URAParkingLotData(lotsAvailable = "0", lotType = "M", carparkNo = "N0006", geometries = listOf(URACoordinates(coordinates = "28956.4609, 29088.2522"))),
-                URAParkingLotData(lotsAvailable = "2", lotType = "M", carparkNo = "S0108", geometries = listOf(URACoordinates(coordinates = "29930.895, 33440.7746")))
+            val expectedParkingLots = listOf(
+                URAParkingLotData(
+                    lotsAvailable = "0",
+                    lotType = "M",
+                    carparkNo = "N0006",
+                    geometries = listOf(URACoordinates(coordinates = "28956.4609, 29088.2522"))
+                ), URAParkingLotData(
+                    lotsAvailable = "2",
+                    lotType = "M",
+                    carparkNo = "S0108",
+                    geometries = listOf(URACoordinates(coordinates = "29930.895, 33440.7746"))
+                )
             )
             val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
             val parkingLots: URAParkingLotResponse = api.getParkingLots()
             assertEquals(expectedParkingLots, parkingLots.result)
+        }
+    }
+}
+
+class LTAParkingAPITest {
+    private val ltaAccountKey: String = System.getenv("LTA_ACCOUNT_KEY") ?: ""
+
+    @Test
+    fun testGetParkingLots() {
+        runBlocking {
+            val mockEngine = MockEngine { _ ->
+                respond(
+                    content = ByteReadChannel(
+                        """{
+                                "odata.metadata": "http://datamall2.mytransport.sg/ltaodataservice/metadata#CarParkAvailability",
+                                "value": [
+                                            {
+                                                "CarParkID": "1",
+                                                "Area": "Marina",
+                                                "Development": "Suntec City",
+                                                "Location": "1.29375 103.85718",
+                                                "AvailableLots": 1104,
+                                                "LotType": "C",
+                                                "Agency": "LTA"
+                                            }
+                                    ]
+                                }"""
+                    ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            }
+            val expectedParkingLots = listOf(
+                LTAParkingAvailabilityData(
+                    carparkId = "1",
+                    area = "Marina",
+                    development = "Suntec City",
+                    location = "1.29375 103.85718",
+                    availableLots = 1104,
+                    lotType = "C",
+                    agency = "LTA"
+                )
+            )
+            val api = LTAParkingAPI(engine = mockEngine, accountKey = ltaAccountKey)
+            val parkingLots: LTAParkingAvailabilityResponse = api.getParkingLots()
+            assertEquals(expectedParkingLots, parkingLots.value)
         }
     }
 }

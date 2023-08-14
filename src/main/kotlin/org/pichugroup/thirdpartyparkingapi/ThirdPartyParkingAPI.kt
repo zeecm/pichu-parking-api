@@ -117,3 +117,39 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
         const val TOKEN_ENDPOINT: String = "https://www.ura.gov.sg/uraDataService/insertNewToken.action"
     }
 }
+
+data class LTAParkingAvailabilityResponse(
+    @SerializedName("odata.metadata") var metadata: String,
+    @SerializedName("value") var value: List<LTAParkingAvailabilityData>
+)
+
+data class LTAParkingAvailabilityData(
+    @SerializedName("CarParkID") var carparkId: String,
+    @SerializedName("Area") var area: String,
+    @SerializedName("Development") var development: String,
+    @SerializedName("Location") var location: String,
+    @SerializedName("AvailableLots") var availableLots: Int,
+    @SerializedName("LotType") var lotType: String,
+    @SerializedName("Agency") var agency: String,
+)
+
+class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accountKey: String): ThirdPartyParkingAPI(httpClient = httpClient, engine = engine) {
+    private val defaultHeader = mapOf(
+        "AccountKey" to accountKey,
+        "accept" to "application/json",
+    )
+
+    companion object {
+        const val PARKING_AVAILABILITY_ENDPOINT: String = "http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2"
+    }
+
+    suspend fun getParkingLots(): LTAParkingAvailabilityResponse {
+        val parkingLotResponse: HttpResponse = this.makeAPICall(PARKING_AVAILABILITY_ENDPOINT, headers = this.defaultHeader)
+        return this.deSerializeLTAParkingAvailabilityResponse(parkingLotResponse.body())
+    }
+
+    private fun deSerializeLTAParkingAvailabilityResponse(jsonText: String): LTAParkingAvailabilityResponse {
+        val gson = Gson()
+        return gson.fromJson(jsonText, LTAParkingAvailabilityResponse::class.java)
+    }
+}
