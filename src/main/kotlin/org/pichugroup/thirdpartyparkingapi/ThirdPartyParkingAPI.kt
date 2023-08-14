@@ -8,6 +8,7 @@ import io.ktor.client.engine.*
 import io.ktor.client.plugins.*
 import io.ktor.client.statement.*
 import io.ktor.client.request.*
+import io.ktor.client.engine.cio.*
 
 private fun createKtorHttpClient(engine: HttpClientEngine?): HttpClient {
     if (engine != null) {
@@ -17,7 +18,7 @@ private fun createKtorHttpClient(engine: HttpClientEngine?): HttpClient {
             }
         }
     }
-    return HttpClient {
+    return HttpClient() {
         install(HttpTimeout) {
             requestTimeoutMillis = 1000
         }
