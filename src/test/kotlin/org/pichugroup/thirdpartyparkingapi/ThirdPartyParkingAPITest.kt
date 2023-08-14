@@ -123,7 +123,7 @@ class LTAParkingAPITest {
             }
             val expectedParkingLots = listOf(
                 LTAParkingAvailabilityData(
-                    carparkId = "1",
+                    carparkID = "1",
                     area = "Marina",
                     development = "Suntec City",
                     location = "1.29375 103.85718",

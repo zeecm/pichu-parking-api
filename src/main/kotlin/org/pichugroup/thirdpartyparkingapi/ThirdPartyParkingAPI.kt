@@ -124,7 +124,7 @@ data class LTAParkingAvailabilityResponse(
 )
 
 data class LTAParkingAvailabilityData(
-    @SerializedName("CarParkID") var carparkId: String,
+    @SerializedName("CarParkID") var carparkID: String,
     @SerializedName("Area") var area: String,
     @SerializedName("Development") var development: String,
     @SerializedName("Location") var location: String,
