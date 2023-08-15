@@ -12,13 +12,13 @@ private fun createKtorHttpClient(engine: HttpClientEngine?): HttpClient {
     if (engine != null) {
         return HttpClient(engine = engine) {
             install(HttpTimeout) {
-                requestTimeoutMillis = 1000
+                requestTimeoutMillis = 30000
             }
         }
     }
     return HttpClient {
         install(HttpTimeout) {
-            requestTimeoutMillis = 1000
+            requestTimeoutMillis = 30000
         }
     }
 }
