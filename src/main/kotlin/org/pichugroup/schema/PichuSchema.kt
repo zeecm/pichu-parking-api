@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class PichuParkingAPIResponse(
     @SerializedName("Timestamp") var timestamp: String,
-    @SerializedName("Data") var data: List<PichuParkingData>,
+    @SerializedName("Data") var data: Set<PichuParkingData>,
 )
 
 data class PichuParkingData(

@@ -27,4 +27,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Checks
+        env:
+          LTA_ACCOUNT_KEY: ${{ secrets.LTA_ACCOUNT_KEY }}
+          URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
         run: ./gradlew check
