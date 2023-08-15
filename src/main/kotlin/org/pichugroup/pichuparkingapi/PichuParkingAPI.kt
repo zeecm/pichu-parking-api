@@ -9,7 +9,9 @@ import io.github.cdimascio.dotenv.dotenv
 import org.pichugroup.thirdpartyparkingapi.LTAParkingAPI
 import org.pichugroup.thirdpartyparkingapi.URAParkingAPI
 
-val dotenv = dotenv()
+val dotenv = dotenv {
+    ignoreIfMissing=true
+}
 
 val URA_ACCESS_KEY: String = System.getenv("URA_ACCESS_KEY") ?: dotenv["URA_ACCESS_KEY"] ?: ""
 val LTA_ACCOUNT_KEY: String = System.getenv("LTA_ACCOUNT_KEY") ?: dotenv["LTA_ACCOUNT_KEY"] ?: ""
