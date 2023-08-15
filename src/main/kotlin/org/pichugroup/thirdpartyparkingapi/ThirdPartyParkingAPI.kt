@@ -74,12 +74,44 @@ data class URACoordinates(
     @SerializedName("coordinates") var coordinates: String,
 )
 
+data class URAParkingRatesResponse(
+    @SerializedName("Status") var status: String,
+    @SerializedName("Message") var message: String,
+    @SerializedName("Result") var result: List<URAParkingRatesData>,
+)
+
+data class URAParkingRatesData(
+    @SerializedName("weekdayMin") var weekdayMin: String,
+    @SerializedName("ppName") var ppName: String,
+    @SerializedName("endTime") var endTime: String,
+    @SerializedName("weekdayRate") var weekdayRate: String,
+    @SerializedName("startTime") var startTime: String,
+    @SerializedName("ppCode") var ppCode: String,
+    @SerializedName("sunPHRate") var sunPHRate: String,
+    @SerializedName("satdayMin") var satdayMin: String,
+    @SerializedName("sunPHMin") var sunPHMin: String,
+    @SerializedName("parkingSystem") var parkingSystem: String,
+    @SerializedName("parkCapacity") var parkCapacity: String,
+    @SerializedName("vehCat") var vehCat: String,
+    @SerializedName("satdayRate") var satdayRate: String,
+    @SerializedName("geometries") var geometries: List<URACoordinates>,
+)
+
 open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accessKey: String) : ThirdPartyParkingAPI(httpClient=httpClient,engine=engine) {
     private val defaultHeaders = mapOf(
         "AccessKey" to accessKey,
         "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
         "x-requested-with" to "XMLHttpRequest",
     )
+
+    companion object {
+        const val PARKING_LOTS_ENDPOINT: String =
+            "https://www.ura.gov.sg/uraDataService/invokeUraDS?service=Car_Park_Availability"
+        const val PARKING_LIST_AND_RATES_ENDPOINT: String =
+            "https://www.ura.gov.sg/uraDataService/invokeUraDS?service=Car_Park_Details"
+        const val TOKEN_ENDPOINT: String = "https://www.ura.gov.sg/uraDataService/insertNewToken.action"
+    }
+
     suspend fun getToken(): String {
         val httpResponse: HttpResponse = this.makeAPICallToGetToken()
         val responseMap: Map<String, Any> = this.convertHttpResponseToMap(httpResponse)
@@ -87,11 +119,24 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
         return token.toString()
     }
 
-    suspend fun getParkingLots(): URAParkingLotResponse {
+    private suspend fun convertHttpResponseToMap(httpResponse: HttpResponse): Map<String, Any> {
+        val responseBody: String = httpResponse.body()
+        return textJsonToMap(responseBody)
+    }
+
+    private suspend fun makeAPICallToGetToken(): HttpResponse {
+        return makeAPICall(endpoint = TOKEN_ENDPOINT, headers = defaultHeaders)
+    }
+
+    private suspend fun augmentHeaderWithToken(): Map<String, String> {
         val token: String = this.getToken()
         val augmentedHeader: MutableMap<String, String> = this.defaultHeaders.toMutableMap()
         augmentedHeader["Token"] = token
+        return augmentedHeader.toMap()
+    }
 
+    suspend fun getParkingLots(): URAParkingLotResponse {
+        val augmentedHeader = this.augmentHeaderWithToken()
         val parkingLotResponse: HttpResponse = this.makeAPICall(PARKING_LOTS_ENDPOINT, headers = augmentedHeader)
         return this.deserializeParkingLotResponse(parkingLotResponse.body())
     }
@@ -101,23 +146,20 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
         return gson.fromJson(parkingLotJsonText, URAParkingLotResponse::class.java)
     }
 
-    private suspend fun makeAPICallToGetToken(): HttpResponse {
-        return makeAPICall(endpoint = TOKEN_ENDPOINT, headers = defaultHeaders)
+    suspend fun getParkingRates(): URAParkingRatesResponse {
+        val augmentedHeader: Map<String, String> = this.augmentHeaderWithToken()
+        val parkingRatesResponse: HttpResponse = this.makeAPICall(PARKING_LIST_AND_RATES_ENDPOINT, headers = augmentedHeader)
+        return this.deserializeParkingRatesResponse(parkingRatesResponse.body())
     }
 
-    private suspend fun convertHttpResponseToMap(httpResponse: HttpResponse): Map<String, Any> {
-        val responseBody: String = httpResponse.body()
-        return textJsonToMap(responseBody)
-    }
-
-    companion object {
-        const val PARKING_LOTS_ENDPOINT: String =
-            "https://www.ura.gov.sg/uraDataService/invokeUraDS?service=Car_Park_Availability"
-        const val PARKING_LIST_AND_RATES_ENDPOINT: String =
-            "https://www.ura.gov.sg/uraDataService/invokeUraDS?service=Car_Park_Details"
-        const val TOKEN_ENDPOINT: String = "https://www.ura.gov.sg/uraDataService/insertNewToken.action"
+    private fun deserializeParkingRatesResponse(parkingRatesJsonText: String): URAParkingRatesResponse {
+        val gson = Gson()
+        return gson.fromJson(parkingRatesJsonText, URAParkingRatesResponse::class.java)
     }
 }
+
+
+
 
 data class LTAParkingAvailabilityResponse(
     @SerializedName("odata.metadata") var metadata: String,

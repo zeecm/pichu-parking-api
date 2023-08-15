@@ -93,6 +93,49 @@ class URAParkingAPITest {
             assertEquals(expectedParkingLots, parkingLots.result)
         }
     }
+
+    @Test
+    fun testGetParkingRates() {
+        runBlocking {
+            val mockEngine = MockEngine { _ ->
+                respond(
+                    content = ByteReadChannel(
+                        """{
+                                  "Status": "Success",
+                                  "Message": "",
+                                  "Result": [{
+                                      "weekdayMin": "30mins",
+                                      "ppName": "ALIWAL STREET",
+                                      "endTime": "05.00 PM",
+                                      "weekdayRate": "$0.50",
+                                      "startTime": "08.30 AM",
+                                      "ppCode": "A0004",
+                                      "sunPHRate": "$0.50",
+                                      "satdayMin": "30 mins",
+                                      "sunPHMin": "30 mins",
+                                      "parkingSystem": "C",
+                                      "parkCapacity": 69,
+                                      "vehCat": "Car",
+                                      "satdayRate": "$0.50",
+                                      "geometries": [{
+                                          "coordinates": "31045.6165, 31694.0055"
+                                        },
+                                        {
+                                          "coordinates": "31126.0755, 31564.9876"
+                                        }
+                                      ]
+                                    },
+                                  ]
+                                  }"""
+                    ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            }
+            val expectedCarparkName: String = "ALIWAL STREET"
+            val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
+            val parkingLots: URAParkingRatesResponse = api.getParkingRates()
+            assertEquals(expectedCarparkName, parkingLots.result[0].ppName)
+        }
+    }
 }
 
 class LTAParkingAPITest {
