@@ -3,6 +3,10 @@ name: Check And Test
 on:
   push:
 
+env:
+  LTA_ACCOUNT_KEY: ${{ secrets.LTA_ACCOUNT_KEY }}
+  URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
+
 jobs:
   gradle:
     strategy:

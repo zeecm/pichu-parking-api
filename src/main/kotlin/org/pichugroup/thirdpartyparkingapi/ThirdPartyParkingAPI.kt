@@ -12,13 +12,13 @@ private fun createKtorHttpClient(engine: HttpClientEngine?): HttpClient {
     if (engine != null) {
         return HttpClient(engine = engine) {
             install(HttpTimeout) {
-                requestTimeoutMillis = 1000
+                requestTimeoutMillis = 30000
             }
         }
     }
     return HttpClient {
         install(HttpTimeout) {
-            requestTimeoutMillis = 1000
+            requestTimeoutMillis = 30000
         }
     }
 }
@@ -53,6 +53,8 @@ abstract class ThirdPartyParkingAPI(private val httpClient: HttpClient? = null, 
         }
         return response
     }
+
+    abstract suspend fun getParkingLots(): Set<PichuParkingData>
 }
 
 
@@ -95,7 +97,7 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
         return augmentedHeader.toMap()
     }
 
-    suspend fun getParkingLots(): Set<PichuParkingData> {
+    override suspend fun getParkingLots(): Set<PichuParkingData> {
         val augmentedHeader = this.augmentHeaderWithToken()
         val parkingLotResponse: HttpResponse = this.makeAPICall(PARKING_LOTS_ENDPOINT, headers = augmentedHeader)
         val uraResponse: URAParkingLotResponse = deserializeJsonTextToSchema(parkingLotResponse.body())
@@ -123,7 +125,7 @@ class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = 
             "http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2"
     }
 
-    suspend fun getParkingLots(): Set<PichuParkingData> {
+    override suspend fun getParkingLots(): Set<PichuParkingData> {
         val parkingLotResponse: HttpResponse =
             this.makeAPICall(PARKING_AVAILABILITY_ENDPOINT, headers = this.defaultHeader)
         val ltaResponse: LTAParkingAvailabilityResponse = deserializeJsonTextToSchema(parkingLotResponse.body())
