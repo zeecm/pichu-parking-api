@@ -4,6 +4,7 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.runBlocking
+import org.pichugroup.schema.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -29,6 +30,37 @@ class UtilityTest {
 class URAParkingAPITest {
     private val uraAccessKey: String = System.getenv("URA_ACCESS_KEY") ?: ""
 
+    companion object {
+        const val PARKING_LOT_RESPONSE = """{
+                                  "Status": "Success",
+                                  "Message": "",
+                                  "Result": [{
+                                      "lotsAvailable": "0",
+                                      "lotType": "M",
+                                      "carparkNo": "N0006",
+                                      "geometries": [{
+                                        "coordinates": "28956.4609, 29088.2522"
+                                      }]
+                                    },
+                                    {
+                                      "lotsAvailable": "2",
+                                      "lotType": "M",
+                                      "carparkNo": "S0108",
+                                      "geometries": [{
+                                        "coordinates": "29930.895, 33440.7746"
+                                      }]
+                                    }
+                                  ]
+                                }"""
+        val parkingLotMockEngine = MockEngine { _ ->
+            respond(
+                content = ByteReadChannel(PARKING_LOT_RESPONSE),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        }
+    }
+
     @Test
     fun testGetToken() {
         runBlocking {
@@ -48,50 +80,20 @@ class URAParkingAPITest {
     @Test
     fun testGetParkingLots() {
         runBlocking {
-            val mockEngine = MockEngine { _ ->
-                respond(
-                    content = ByteReadChannel(
-                        """{
-                                                  "Status": "Success",
-                                                  "Message": "",
-                                                  "Result": [{
-                                                      "lotsAvailable": "0",
-                                                      "lotType": "M",
-                                                      "carparkNo": "N0006",
-                                                      "geometries": [{
-                                                        "coordinates": "28956.4609, 29088.2522"
-                                                      }]
-                                                    },
-                                                    {
-                                                      "lotsAvailable": "2",
-                                                      "lotType": "M",
-                                                      "carparkNo": "S0108",
-                                                      "geometries": [{
-                                                        "coordinates": "29930.895, 33440.7746"
-                                                      }]
-                                                    }
-                                                  ]
-                                                }"""
-                    ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
-                )
-            }
-            val expectedParkingLots = listOf(
-                URAParkingLotData(
-                    lotsAvailable = "0",
-                    lotType = "M",
-                    carparkNo = "N0006",
-                    geometries = listOf(URACoordinates(coordinates = "28956.4609, 29088.2522"))
-                ), URAParkingLotData(
-                    lotsAvailable = "2",
-                    lotType = "M",
-                    carparkNo = "S0108",
-                    geometries = listOf(URACoordinates(coordinates = "29930.895, 33440.7746"))
-                )
-            )
-            val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
-            val parkingLots: URAParkingLotResponse = api.getParkingLots()
-            assertEquals(expectedParkingLots, parkingLots.result)
+            val expectedCarparkIDs = setOf("N0006", "S0108")
+            val api = URAParkingAPI(engine = parkingLotMockEngine, accessKey = uraAccessKey)
+            val parkingLots: Set<PichuParkingData> = api.getParkingLots()
+            val parkingLotIDs: Set<String> = parkingLots.map { it.carparkID }.toSet()
+            assertEquals(expectedCarparkIDs, parkingLotIDs)
         }
+    }
+
+    @Test
+    fun testDeserializeParkingLotResponse() {
+        val expectedCarparkIDs = setOf("N0006", "S0108")
+        val uraParkingLotResponse: URAParkingLotResponse = deserializeJsonTextToSchema(PARKING_LOT_RESPONSE)
+        val parkingLotIDs: Set<String> = uraParkingLotResponse.result.map { it.carparkNo }.toSet()
+        assertEquals(expectedCarparkIDs, parkingLotIDs)
     }
 
     @Test
@@ -130,7 +132,7 @@ class URAParkingAPITest {
                     ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
             }
-            val expectedCarparkName: String = "ALIWAL STREET"
+            val expectedCarparkName = "ALIWAL STREET"
             val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
             val parkingLots: URAParkingRatesResponse = api.getParkingRates()
             assertEquals(expectedCarparkName, parkingLots.result[0].ppName)
@@ -141,13 +143,8 @@ class URAParkingAPITest {
 class LTAParkingAPITest {
     private val ltaAccountKey: String = System.getenv("LTA_ACCOUNT_KEY") ?: ""
 
-    @Test
-    fun testGetParkingLots() {
-        runBlocking {
-            val mockEngine = MockEngine { _ ->
-                respond(
-                    content = ByteReadChannel(
-                        """{
+    companion object {
+        const val PARKING_LOT_RESPONSE = """{
                                 "odata.metadata": "http://datamall2.mytransport.sg/ltaodataservice/metadata#CarParkAvailability",
                                 "value": [
                                             {
@@ -161,23 +158,31 @@ class LTAParkingAPITest {
                                             }
                                     ]
                                 }"""
-                    ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
-                )
-            }
-            val expectedParkingLots = listOf(
-                LTAParkingAvailabilityData(
-                    carparkID = "1",
-                    area = "Marina",
-                    development = "Suntec City",
-                    location = "1.29375 103.85718",
-                    availableLots = 1104,
-                    lotType = "C",
-                    agency = "LTA"
-                )
+        val parkingLotsMockEngine = MockEngine { _ ->
+            respond(
+                content = ByteReadChannel(PARKING_LOT_RESPONSE),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
-            val api = LTAParkingAPI(engine = mockEngine, accountKey = ltaAccountKey)
-            val parkingLots: LTAParkingAvailabilityResponse = api.getParkingLots()
-            assertEquals(expectedParkingLots, parkingLots.value)
         }
+    }
+
+    @Test
+    fun testGetParkingLots() {
+        runBlocking {
+            val api = LTAParkingAPI(engine = parkingLotsMockEngine, accountKey = ltaAccountKey)
+            val parkingLots: Set<PichuParkingData> = api.getParkingLots()
+            val availableLots = parkingLots.map { it.availableLots }
+            val expectedAvailableLots: List<Int> = listOf(1104)
+            assertEquals(availableLots, expectedAvailableLots)
+        }
+    }
+
+    @Test
+    fun testDeserializeParkingLotResponse() {
+        val expectedAvailableLots: List<Int> = listOf(1104)
+        val parkingLotResponse: LTAParkingAvailabilityResponse = deserializeJsonTextToSchema(PARKING_LOT_RESPONSE)
+        val actualAvailableLots: List<Int> = parkingLotResponse.value.map { it.availableLots }
+        assertEquals(expectedAvailableLots, actualAvailableLots)
     }
 }
