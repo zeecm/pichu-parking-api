@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.pichugroup"
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -19,6 +19,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation("com.amazonaws:aws-lambda-java-core:1.2.2")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-test-dispatcher:$ktorVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
@@ -31,4 +32,15 @@ tasks.test {
 
 kotlin {
     jvmToolchain(8)
+}
+
+application {
+    mainClass.set("org.pichugroup.pichuparkingapi.PichuParkingAPI")
+}
+
+tasks.register<Zip>("buildZip") {
+    into("lib") {
+        from(tasks.getByName<Jar>("jar"))
+        from(configurations.getByName("runtimeClasspath"))
+    }
 }
