@@ -22,7 +22,7 @@ fun getParkingLots(parkingLotAPIs: Collection<ThirdPartyParkingAPI> = listOf(
 )): PichuParkingAPIResponse {
     val currentTime = LocalDateTime.now().toString()
 
-    val parkingLotData: Set<PichuParkingData> = mutableSetOf()
+    val parkingLotData: MutableSet<PichuParkingData> = mutableSetOf()
 
     for (api in parkingLotAPIs) {
         runBlocking {
