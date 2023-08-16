@@ -7,6 +7,11 @@ data class LatLonCoordinate(
     val longitude: Double,
 )
 
+data class SVY21Coordinate(
+    val easting: Double,
+    val northing: Double,
+)
+
 internal class SVY21 {
     companion object {
         const val DEGREE_TO_RADIANS_FACTOR: Double = PI / 180
