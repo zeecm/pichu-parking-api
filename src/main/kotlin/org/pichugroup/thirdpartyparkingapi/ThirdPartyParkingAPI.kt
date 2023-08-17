@@ -58,10 +58,10 @@ abstract class ThirdPartyParkingAPI(private val httpClient: HttpClient? = null, 
 }
 
 
-open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accessKey: String) :
+class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val apiKey: String) :
     ThirdPartyParkingAPI(httpClient = httpClient, engine = engine) {
     private val defaultHeaders = mapOf(
-        "AccessKey" to accessKey,
+        "AccessKey" to apiKey,
         "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
         "x-requested-with" to "XMLHttpRequest",
     )
@@ -75,8 +75,8 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
     }
 
     suspend fun getToken(): String {
-        val httpResponse: HttpResponse = this.makeAPICallToGetToken()
-        val responseMap: Map<String, Any> = this.convertHttpResponseToMap(httpResponse)
+        val httpResponse: HttpResponse = makeAPICallToGetToken()
+        val responseMap: Map<String, Any> = convertHttpResponseToMap(httpResponse)
         val token: Any = responseMap["Result"] ?: throw Exception("Null Token Received")
         return token.toString()
     }
@@ -91,32 +91,31 @@ open class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngin
     }
 
     private suspend fun augmentHeaderWithToken(): Map<String, String> {
-        val token: String = this.getToken()
+        val token: String = getToken()
         val augmentedHeader: MutableMap<String, String> = this.defaultHeaders.toMutableMap()
         augmentedHeader["Token"] = token
         return augmentedHeader.toMap()
     }
 
     override suspend fun getParkingLots(): Set<PichuParkingData> {
-        val augmentedHeader = this.augmentHeaderWithToken()
-        val parkingLotResponse: HttpResponse = this.makeAPICall(PARKING_LOTS_ENDPOINT, headers = augmentedHeader)
+        val augmentedHeader = augmentHeaderWithToken()
+        val parkingLotResponse: HttpResponse = makeAPICall(PARKING_LOTS_ENDPOINT, headers = augmentedHeader)
         val uraResponse: URAParkingLotResponse = deserializeJsonTextToSchema(parkingLotResponse.body())
         return translateURAParkingLotResponse(uraResponse)
     }
 
 
     suspend fun getParkingRates(): URAParkingRatesResponse {
-        val augmentedHeader: Map<String, String> = this.augmentHeaderWithToken()
-        val parkingRatesResponse: HttpResponse =
-            this.makeAPICall(PARKING_LIST_AND_RATES_ENDPOINT, headers = augmentedHeader)
+        val augmentedHeader: Map<String, String> = augmentHeaderWithToken()
+        val parkingRatesResponse: HttpResponse = makeAPICall(PARKING_LIST_AND_RATES_ENDPOINT, headers = augmentedHeader)
         return deserializeJsonTextToSchema(parkingRatesResponse.body())
     }
 }
 
-class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accountKey: String) :
+internal class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val apiKey: String) :
     ThirdPartyParkingAPI(httpClient = httpClient, engine = engine) {
     private val defaultHeader = mapOf(
-        "AccountKey" to accountKey,
+        "AccountKey" to apiKey,
         "accept" to "application/json",
     )
 
@@ -126,9 +125,36 @@ class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = 
     }
 
     override suspend fun getParkingLots(): Set<PichuParkingData> {
-        val parkingLotResponse: HttpResponse =
-            this.makeAPICall(PARKING_AVAILABILITY_ENDPOINT, headers = this.defaultHeader)
+        val parkingLotResponse: HttpResponse = makeAPICall(PARKING_AVAILABILITY_ENDPOINT, headers = defaultHeader)
         val ltaResponse: LTAParkingAvailabilityResponse = deserializeJsonTextToSchema(parkingLotResponse.body())
         return translateLTAParkingAvailabilityResponse(ltaResponse)
+    }
+}
+
+internal interface ThirdPartyParkingAPIFactory {
+    fun createInstance(
+        httpClient: HttpClient? = null,
+        engine: HttpClientEngine? = null,
+        apiKey: String,
+    ): ThirdPartyParkingAPI
+}
+
+internal object LTAParkingAPIFactory : ThirdPartyParkingAPIFactory {
+    override fun createInstance(
+        httpClient: HttpClient?,
+        engine: HttpClientEngine?,
+        apiKey: String,
+    ): ThirdPartyParkingAPI {
+        return LTAParkingAPI(httpClient, engine, apiKey)
+    }
+}
+
+internal object URAParkingAPIFactory : ThirdPartyParkingAPIFactory {
+    override fun createInstance(
+        httpClient: HttpClient?,
+        engine: HttpClientEngine?,
+        apiKey: String,
+    ): ThirdPartyParkingAPI {
+        return URAParkingAPI(httpClient, engine, apiKey)
     }
 }
