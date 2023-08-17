@@ -13,7 +13,7 @@ data class URAParkingLotData(
     @SerializedName("lotsAvailable") var lotsAvailable: String,
     @SerializedName("lotType") var lotType: String,
     @SerializedName("carparkNo") var carparkNo: String,
-    @SerializedName("geometries") var geometries: List<URACoordinates>
+    @SerializedName("geometries") var geometries: List<URACoordinates>,
 )
 
 data class URACoordinates(
@@ -45,7 +45,7 @@ data class URAParkingRatesData(
 
 data class LTAParkingAvailabilityResponse(
     @SerializedName("odata.metadata") var metadata: String,
-    @SerializedName("value") var value: List<LTAParkingAvailabilityData>
+    @SerializedName("value") var value: List<LTAParkingAvailabilityData>,
 )
 
 data class LTAParkingAvailabilityData(

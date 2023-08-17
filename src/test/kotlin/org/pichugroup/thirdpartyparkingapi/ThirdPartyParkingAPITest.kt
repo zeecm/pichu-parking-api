@@ -71,7 +71,7 @@ class URAParkingAPITest {
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
             }
-            val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
+            val api = URAParkingAPI(engine = mockEngine, apiKey = uraAccessKey)
             val token = api.getToken()
             assertEquals("mocked_token", token)
         }
@@ -81,7 +81,7 @@ class URAParkingAPITest {
     fun testGetParkingLots() {
         runBlocking {
             val expectedCarparkIDs = setOf("N0006", "S0108")
-            val api = URAParkingAPI(engine = parkingLotMockEngine, accessKey = uraAccessKey)
+            val api = URAParkingAPI(engine = parkingLotMockEngine, apiKey = uraAccessKey)
             val parkingLots: Set<PichuParkingData> = api.getParkingLots()
             val parkingLotIDs: Set<String> = parkingLots.map { it.carparkID }.toSet()
             assertEquals(expectedCarparkIDs, parkingLotIDs)
@@ -133,7 +133,7 @@ class URAParkingAPITest {
                 )
             }
             val expectedCarparkName = "ALIWAL STREET"
-            val api = URAParkingAPI(engine = mockEngine, accessKey = uraAccessKey)
+            val api = URAParkingAPI(engine = mockEngine, apiKey = uraAccessKey)
             val parkingLots: URAParkingRatesResponse = api.getParkingRates()
             assertEquals(expectedCarparkName, parkingLots.result[0].ppName)
         }
@@ -170,7 +170,7 @@ class LTAParkingAPITest {
     @Test
     fun testGetParkingLots() {
         runBlocking {
-            val api = LTAParkingAPI(engine = parkingLotsMockEngine, accountKey = ltaAccountKey)
+            val api = LTAParkingAPI(engine = parkingLotsMockEngine, apiKey = ltaAccountKey)
             val parkingLots: Set<PichuParkingData> = api.getParkingLots()
             val availableLots = parkingLots.map { it.availableLots }
             val expectedAvailableLots: List<Int> = listOf(1104)

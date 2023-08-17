@@ -58,10 +58,10 @@ abstract class ThirdPartyParkingAPI(private val httpClient: HttpClient? = null, 
 }
 
 
-class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accessKey: String) :
+class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val apiKey: String) :
     ThirdPartyParkingAPI(httpClient = httpClient, engine = engine) {
     private val defaultHeaders = mapOf(
-        "AccessKey" to accessKey,
+        "AccessKey" to apiKey,
         "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
         "x-requested-with" to "XMLHttpRequest",
     )
@@ -107,16 +107,15 @@ class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = 
 
     suspend fun getParkingRates(): URAParkingRatesResponse {
         val augmentedHeader: Map<String, String> = augmentHeaderWithToken()
-        val parkingRatesResponse: HttpResponse =
-            makeAPICall(PARKING_LIST_AND_RATES_ENDPOINT, headers = augmentedHeader)
+        val parkingRatesResponse: HttpResponse = makeAPICall(PARKING_LIST_AND_RATES_ENDPOINT, headers = augmentedHeader)
         return deserializeJsonTextToSchema(parkingRatesResponse.body())
     }
 }
 
-internal class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val accountKey: String) :
+internal class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = null, val apiKey: String) :
     ThirdPartyParkingAPI(httpClient = httpClient, engine = engine) {
     private val defaultHeader = mapOf(
-        "AccountKey" to accountKey,
+        "AccountKey" to apiKey,
         "accept" to "application/json",
     )
 
@@ -126,9 +125,36 @@ internal class LTAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientE
     }
 
     override suspend fun getParkingLots(): Set<PichuParkingData> {
-        val parkingLotResponse: HttpResponse =
-            makeAPICall(PARKING_AVAILABILITY_ENDPOINT, headers = defaultHeader)
+        val parkingLotResponse: HttpResponse = makeAPICall(PARKING_AVAILABILITY_ENDPOINT, headers = defaultHeader)
         val ltaResponse: LTAParkingAvailabilityResponse = deserializeJsonTextToSchema(parkingLotResponse.body())
         return translateLTAParkingAvailabilityResponse(ltaResponse)
+    }
+}
+
+internal interface ThirdPartyParkingAPIFactory {
+    fun createInstance(
+        httpClient: HttpClient? = null,
+        engine: HttpClientEngine? = null,
+        apiKey: String,
+    ): ThirdPartyParkingAPI
+}
+
+internal object LTAParkingAPIFactory : ThirdPartyParkingAPIFactory {
+    override fun createInstance(
+        httpClient: HttpClient?,
+        engine: HttpClientEngine?,
+        apiKey: String,
+    ): ThirdPartyParkingAPI {
+        return LTAParkingAPI(httpClient, engine, apiKey)
+    }
+}
+
+internal object URAParkingAPIFactory : ThirdPartyParkingAPIFactory {
+    override fun createInstance(
+        httpClient: HttpClient?,
+        engine: HttpClientEngine?,
+        apiKey: String,
+    ): ThirdPartyParkingAPI {
+        return URAParkingAPI(httpClient, engine, apiKey)
     }
 }

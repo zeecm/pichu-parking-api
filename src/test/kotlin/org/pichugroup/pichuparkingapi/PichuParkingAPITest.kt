@@ -10,8 +10,9 @@ class PichuParkingAPITest {
     @Test
     fun testGetParkingLot() {
         val currentDate: String = LocalDate.now().toStr()
-        val response: String = PichuParkingAPI().getParkingLots()
-        val responseDate: String = response.substring(14, 24) // start of string is {"Timestamp":"2023-08-17
+        val response: PichuParkingAPIResponse = getParkingLots()
+        val responseDateTime: String = response.timestamp
+        val responseDate: String = responseDateTime.substring(0, 10)
         assertEquals(currentDate, responseDate)
     }
 }

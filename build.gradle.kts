@@ -35,7 +35,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("org.pichugroup.pichuparkingapi.PichuParkingAPI")
+    mainClass.set("Handler.kt")
 }
 
 tasks.register<Zip>("buildZip") {
