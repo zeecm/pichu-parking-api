@@ -45,8 +45,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy to Lambda
-        with:
-          aws-region: ${ env.AWS_REGION }}
         run: |
           aws lambda update-function-code \
             --function-name pichu-parking-api \
