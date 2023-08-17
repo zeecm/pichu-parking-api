@@ -8,6 +8,8 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   VERSION: 0.0.1
+  LTA_ACCOUNT_KEY: ${{ secrets.LTA_ACCOUNT_KEY }}
+  URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
 
 jobs:
   deploy:
