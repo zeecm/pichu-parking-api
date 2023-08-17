@@ -1,0 +1,53 @@
+name: Deploy Lambda Function
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-southeast-1
+  VERSION: 0.0.1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run Checks
+        run: ./gradlew check
+
+      - name: Build JAR
+        run: ./gradlew buildZip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::186157170780:role/GithubLambdaDeploy
+          role-session-name: GitHub_AWS
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to Lambda
+        with:
+          aws-region: ${ env.AWS_REGION }}
+        run: |
+          aws lambda update-function-code \
+            --function-name pichu-parking-api \
+            --zip-file=fileb://build/distributions/pichu-parking-api-${{ env.VERSION }}.zip
