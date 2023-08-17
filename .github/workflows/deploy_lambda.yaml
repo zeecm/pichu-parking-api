@@ -13,6 +13,8 @@ env:
 
 jobs:
   deploy:
+    environment: 
+        name: prod
     runs-on: ubuntu-latest
     permissions:
       id-token: write
