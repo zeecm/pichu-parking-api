@@ -1,4 +1,4 @@
-package org.pichugroup.svy21
+package org.pichugroup.coordinatesystem
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

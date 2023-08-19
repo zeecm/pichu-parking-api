@@ -15,4 +15,9 @@ class PichuParkingAPITest {
         val responseDate: String = responseDateTime.substring(0, 10)
         assertEquals(currentDate, responseDate)
     }
+
+    @Test
+    fun testGetNearestParkingLot() {
+
+    }
 }

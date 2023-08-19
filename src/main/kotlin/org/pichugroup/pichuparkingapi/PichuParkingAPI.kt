@@ -5,6 +5,9 @@ import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.runBlocking
 import org.pichugroup.schema.PichuParkingAPIResponse
 import org.pichugroup.schema.PichuParkingData
+import org.pichugroup.coordinatesystem.LatLonCoordinate
+import org.pichugroup.coordinatesystem.distanceKMToLatitude
+import org.pichugroup.coordinatesystem.distanceKMToLongitude
 import org.pichugroup.thirdpartyparkingapi.LTAParkingAPIFactory
 import org.pichugroup.thirdpartyparkingapi.ThirdPartyParkingAPI
 import org.pichugroup.thirdpartyparkingapi.ThirdPartyParkingAPIFactory
@@ -53,6 +56,23 @@ fun getParkingLots(thirdPartyAPIs: Collection<ThirdPartyParkingAPI> = instantiat
     }
 
     return PichuParkingAPIResponse(timestamp = currentTime, data = parkingLotData)
+}
+
+internal fun getNearestParkingLots(parkingLotData: MutableSet<PichuParkingData>, latLon: LatLonCoordinate, maxDistKM: Double): Set<PichuParkingData> {
+    val (referenceLatitude: Double, referenceLongitude: Double) = latLon
+    val maxLatitude: Double = referenceLatitude + distanceKMToLatitude(maxDistKM)
+    val maxLongitude: Double = referenceLongitude + distanceKMToLongitude(maxDistKM, maxLatitude)
+    val minLatitude: Double = referenceLatitude - distanceKMToLatitude(maxDistKM)
+    val minLongitude: Double = referenceLongitude - distanceKMToLongitude(maxDistKM, maxLatitude)
+
+    val parkingLotWithinLatitudeRange: List<PichuParkingData> = parkingLotData.filter {
+        it.latitude > minLatitude && it.latitude < maxLatitude
+    }
+    val parkingLotWithinLongitudeAndLatitudeRange: List<PichuParkingData> = parkingLotWithinLatitudeRange.filter {
+        it.longitude > minLongitude && it.longitude < maxLongitude
+    }
+
+    return parkingLotWithinLongitudeAndLatitudeRange.toSet()
 }
 
 private inline fun <reified T> convertToJson(dataClass: T): String {
