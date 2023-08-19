@@ -1,9 +1,9 @@
 package org.pichugroup.thirdpartyparkingapi
 
 import org.pichugroup.schema.*
-import org.pichugroup.svy21.LatLonCoordinate
-import org.pichugroup.svy21.SVY21
-import org.pichugroup.svy21.SVY21Coordinate
+import org.pichugroup.coordinatesystem.LatLonCoordinate
+import org.pichugroup.coordinatesystem.SVY21
+import org.pichugroup.coordinatesystem.SVY21Coordinate
 
 fun translateURAParkingLotResponse(uraParkingLotResponse: URAParkingLotResponse): Set<PichuParkingData> {
     if (uraParkingLotResponse.status != "Success") {
