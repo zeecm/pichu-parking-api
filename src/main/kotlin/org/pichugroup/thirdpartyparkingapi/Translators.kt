@@ -45,11 +45,75 @@ private fun translateURAParkingLotData(uraParkingLotData: URAParkingLotData): Li
                 vehicleCategory = vehicleCategory,
                 availableLots = availableLots,
                 latitude = latitude,
-                longitude = longitude
+                longitude = longitude,
+                agency = "URA"
             )
         )
     }
     return parkingData
+}
+
+fun translateURAParkingRatesResponse(uraParkingRatesResponse: URAParkingRatesResponse): Set<PichuParkingRates> {
+    if (uraParkingRatesResponse.status != "Success") {
+        throw Exception("API Returned Invalid Data")
+    }
+
+    val parkingRates: List<URAParkingRatesData> = uraParkingRatesResponse.result
+
+    val finalList = mutableListOf<PichuParkingRates>()
+
+    for (ratesData in parkingRates) {
+        val pichuData: List<PichuParkingRates> = translateURAParkingRatesData(ratesData)
+        finalList.addAll(pichuData)
+    }
+
+    return finalList.toSet()
+}
+
+private fun translateURAParkingRatesData(uraParkingRatesData: URAParkingRatesData): List<PichuParkingRates> {
+    val svy21 = SVY21()
+
+    val ratesData = mutableListOf<PichuParkingRates>()
+
+    val carparkID = uraParkingRatesData.ppCode
+    val carparkName = uraParkingRatesData.ppName
+    val vehicleCategory = uraParkingRatesData.vehCat
+    val parkingSystem = uraParkingRatesData.parkingSystem
+    val capacity = uraParkingRatesData.parkCapacity
+    val weekdayMin = uraParkingRatesData.weekdayMin
+    val weekdayRate = uraParkingRatesData.weekdayRate
+    val saturdayMin = uraParkingRatesData.satdayMin
+    val saturdayRate = uraParkingRatesData.satdayRate
+    val sundayPHMin = uraParkingRatesData.sunPHMin
+    val sundayPHRate = uraParkingRatesData.sunPHRate
+    val timeRange = "${uraParkingRatesData.startTime} to ${uraParkingRatesData.endTime}"
+
+    for (coordinates in uraParkingRatesData.geometries) {
+        val svy21Coordinate = splitURASvy21String(coordinates.coordinates)
+        val latLonCoordinate: LatLonCoordinate =
+            svy21.convertSVY21ToLatLon(svy21Easting = svy21Coordinate.easting, svy21Northing = svy21Coordinate.northing)
+        val latitude: Double = latLonCoordinate.latitude
+        val longitude: Double = latLonCoordinate.longitude
+        ratesData.add(
+            PichuParkingRates(
+                carparkID,
+                carparkName,
+                vehicleCategory,
+                latitude,
+                longitude,
+                parkingSystem,
+                capacity,
+                timeRange,
+                weekdayMin,
+                weekdayRate,
+                saturdayMin,
+                saturdayRate,
+                sundayPHMin,
+                sundayPHRate
+            )
+        )
+    }
+    return ratesData
 }
 
 private fun splitURASvy21String(svy21String: String): SVY21Coordinate {
@@ -78,13 +142,15 @@ private fun translateLTAParkingAvailabilityData(ltaParkingAvailabilityData: LTAP
     val longitude = latLonCoordinate.longitude
     val vehicleCategory = ltaParkingAvailabilityData.lotType
     val availableLots = ltaParkingAvailabilityData.availableLots
+    val agency = ltaParkingAvailabilityData.agency
     return PichuParkingData(
         carparkID = carparkID,
         carparkName = carparkName,
         vehicleCategory = vehicleCategory,
         availableLots = availableLots,
         latitude = latitude,
-        longitude = longitude
+        longitude = longitude,
+        agency = agency
     )
 }
 

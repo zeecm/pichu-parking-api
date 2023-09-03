@@ -105,10 +105,11 @@ class URAParkingAPI(httpClient: HttpClient? = null, engine: HttpClientEngine? = 
     }
 
 
-    suspend fun getParkingRates(): URAParkingRatesResponse {
+    suspend fun getParkingRates(): Set<PichuParkingRates> {
         val augmentedHeader: Map<String, String> = augmentHeaderWithToken()
         val parkingRatesResponse: HttpResponse = makeAPICall(PARKING_LIST_AND_RATES_ENDPOINT, headers = augmentedHeader)
-        return deserializeJsonTextToSchema(parkingRatesResponse.body())
+        val uraResponse: URAParkingRatesResponse = deserializeJsonTextToSchema(parkingRatesResponse.body())
+        return translateURAParkingRatesResponse((uraResponse))
     }
 }
 

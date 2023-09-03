@@ -52,9 +52,43 @@ class URAParkingAPITest {
                                     }
                                   ]
                                 }"""
+        const val PARKING_RATES_RESPONSE = """{
+                                  "Status": "Success",
+                                  "Message": "",
+                                  "Result": [{
+                                      "weekdayMin": "30mins",
+                                      "ppName": "ALIWAL STREET",
+                                      "endTime": "05.00 PM",
+                                      "weekdayRate": "$0.50",
+                                      "startTime": "08.30 AM",
+                                      "ppCode": "A0004",
+                                      "sunPHRate": "$0.50",
+                                      "satdayMin": "30 mins",
+                                      "sunPHMin": "30 mins",
+                                      "parkingSystem": "C",
+                                      "parkCapacity": 69,
+                                      "vehCat": "Car",
+                                      "satdayRate": "$0.50",
+                                      "geometries": [{
+                                          "coordinates": "31045.6165, 31694.0055"
+                                        },
+                                        {
+                                          "coordinates": "31126.0755, 31564.9876"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                 }"""
         val parkingLotMockEngine = MockEngine { _ ->
             respond(
                 content = ByteReadChannel(PARKING_LOT_RESPONSE),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        }
+        val parkingRatesMockEngine = MockEngine {
+            respond(
+                content = ByteReadChannel(PARKING_RATES_RESPONSE),
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json")
             )
@@ -99,44 +133,18 @@ class URAParkingAPITest {
     @Test
     fun testGetParkingRates() {
         runBlocking {
-            val mockEngine = MockEngine { _ ->
-                respond(
-                    content = ByteReadChannel(
-                        """{
-                                  "Status": "Success",
-                                  "Message": "",
-                                  "Result": [{
-                                      "weekdayMin": "30mins",
-                                      "ppName": "ALIWAL STREET",
-                                      "endTime": "05.00 PM",
-                                      "weekdayRate": "$0.50",
-                                      "startTime": "08.30 AM",
-                                      "ppCode": "A0004",
-                                      "sunPHRate": "$0.50",
-                                      "satdayMin": "30 mins",
-                                      "sunPHMin": "30 mins",
-                                      "parkingSystem": "C",
-                                      "parkCapacity": 69,
-                                      "vehCat": "Car",
-                                      "satdayRate": "$0.50",
-                                      "geometries": [{
-                                          "coordinates": "31045.6165, 31694.0055"
-                                        },
-                                        {
-                                          "coordinates": "31126.0755, 31564.9876"
-                                        }
-                                      ]
-                                    },
-                                  ]
-                                  }"""
-                    ), status = HttpStatusCode.OK, headers = headersOf(HttpHeaders.ContentType, "application/json")
-                )
-            }
             val expectedCarparkName = "ALIWAL STREET"
-            val api = URAParkingAPI(engine = mockEngine, apiKey = uraAccessKey)
-            val parkingLots: URAParkingRatesResponse = api.getParkingRates()
-            assertEquals(expectedCarparkName, parkingLots.result[0].ppName)
+            val api = URAParkingAPI(engine = parkingRatesMockEngine, apiKey = uraAccessKey)
+            val parkingRates: Set<PichuParkingRates> = api.getParkingRates()
+            assertEquals(expectedCarparkName, parkingRates.elementAt(0).carparkName)
         }
+    }
+
+    @Test
+    fun testDeserializeParkingRatesResponse() {
+        val expectedCarparkName = "ALIWAL STREET"
+        val uraParkingRatesResponse: URAParkingRatesResponse = deserializeJsonTextToSchema(PARKING_RATES_RESPONSE)
+        assertEquals(uraParkingRatesResponse.result[0].ppName, expectedCarparkName)
     }
 }
 

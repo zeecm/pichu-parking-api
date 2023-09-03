@@ -37,7 +37,7 @@ data class URAParkingRatesData(
     @SerializedName("satdayMin") var satdayMin: String,
     @SerializedName("sunPHMin") var sunPHMin: String,
     @SerializedName("parkingSystem") var parkingSystem: String,
-    @SerializedName("parkCapacity") var parkCapacity: String,
+    @SerializedName("parkCapacity") var parkCapacity: Int,
     @SerializedName("vehCat") var vehCat: String,
     @SerializedName("satdayRate") var satdayRate: String,
     @SerializedName("geometries") var geometries: List<URACoordinates>,

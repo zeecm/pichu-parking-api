@@ -3,31 +3,34 @@ package org.pichugroup.schema
 import com.google.gson.annotations.SerializedName
 
 data class PichuParkingAPIResponse(
-    @SerializedName("Timestamp") var timestamp: String,
-    @SerializedName("Data") var data: Set<PichuParkingData>,
+    @SerializedName("timestamp") var timestamp: String,
+    @SerializedName("data") var data: Set<PichuParkingData>,
 )
 
 data class PichuParkingData(
-    @SerializedName("CarparkID") var carparkID: String,
-    @SerializedName("CarparkName") var carparkName: String,
-    @SerializedName("Latitude") var latitude: Double,
-    @SerializedName("Longitude") var longitude: Double,
-    @SerializedName("VehicleCategory") var vehicleCategory: String,
-    @SerializedName("AvailableLots") var availableLots: Int,
+    @SerializedName("carparkID") var carparkID: String,
+    @SerializedName("carparkName") var carparkName: String,
+    @SerializedName("latitude") var latitude: Double,
+    @SerializedName("longitude") var longitude: Double,
+    @SerializedName("vehicleCategory") var vehicleCategory: String,
+    @SerializedName("availableLots") var availableLots: Int,
+    @SerializedName("agency") var agency: String,
 )
 
 data class PichuParkingRates(
-    @SerializedName("CarparkID") var carparkID: String,
-    @SerializedName("VehicleCategory") var vehicleCategory: String,
-    @SerializedName("Latitude") var latitude: Double,
-    @SerializedName("Longitude") var longitude: Double,
+    @SerializedName("carparkID") var carparkID: String,
+    @SerializedName("carparkName") var carparkName: String,
+    @SerializedName("vehicleCategory") var vehicleCategory: String,
+    @SerializedName("latitude") var latitude: Double,
+    @SerializedName("longitude") var longitude: Double,
     @SerializedName("parkingSystem") var parkingSystem: String,
-    @SerializedName("TimeRange") var timeRange: String,
-    @SerializedName("WeekdayMin") var weekdayMin: String,
-    @SerializedName("WeekdayRate") var weekdayRate: String,
-    @SerializedName("SaturdayMin") var saturdayMin: String,
-    @SerializedName("SaturdayRate") var saturdayRate: String,
-    @SerializedName("SundayMin") var sundayMin: String,
-    @SerializedName("SundayPHRate") var sundayPHRate: String,
+    @SerializedName("capacity") var capacity: Int,
+    @SerializedName("timeRange") var timeRange: String,
+    @SerializedName("weekdayMin") var weekdayMin: String,
+    @SerializedName("weekdayRate") var weekdayRate: String,
+    @SerializedName("saturdayMin") var saturdayMin: String,
+    @SerializedName("saturdayRate") var saturdayRate: String,
+    @SerializedName("sundayPHMin") var sundayPHMin: String,
+    @SerializedName("sundayPHRate") var sundayPHRate: String,
 )
 
