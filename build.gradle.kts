@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    val ktorVersion = "2.3.3"
+    val ktorVersion = "2.3.4"
     val mockkVersion = "1.13.5"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -20,6 +20,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.2")
+    implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-test-dispatcher:$ktorVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
