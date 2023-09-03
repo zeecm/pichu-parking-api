@@ -10,6 +10,7 @@ env:
   VERSION: 0.0.2
   LTA_ACCOUNT_KEY: ${{ secrets.LTA_ACCOUNT_KEY }}
   URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
+  AWS_LAMBDA_ROLE: ${{ secrets.AWS_LAMBDA_DEPLOY_ROLE }}
 
 jobs:
   deploy:
@@ -44,12 +45,12 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::186157170780:role/GithubLambdaDeploy
+          role-to-assume: ${{ env.AWS_LAMBDA_ROLE }}
           role-session-name: GitHub_AWS
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy to Lambda
         run: |
           aws lambda update-function-code \
-            --function-name pichu-parking-api \
+            --function-name ${{ vars.LAMBDA_FUNCTION_NAME }} \
             --zip-file=fileb://build/distributions/pichu-parking-api-${{ env.VERSION }}.zip
