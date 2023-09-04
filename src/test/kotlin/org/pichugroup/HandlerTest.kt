@@ -12,7 +12,7 @@ class HandlerTest {
     private val gson = Gson()
 
     companion object {
-        val parkingLotsPayloadString = """
+        const val parkingLotsPayloadString = """
                                         {
                                             "body-json": {},
                                             "params": {
@@ -43,7 +43,7 @@ class HandlerTest {
                                             }
                                         }
                                         """
-        val parkingRatesPayloadString = """
+        const val parkingRatesPayloadString = """
                                         {
                                             "body-json": {},
                                             "params": {
