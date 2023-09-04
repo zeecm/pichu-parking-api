@@ -9,11 +9,11 @@ val logger = KotlinLogging.logger {}
 class PichuHandler {
     private val api = PichuParkingAPI()
     fun handleRequest(event: APIGatewayEventPayload? = null, context: Context? = null): PichuParkingAPIResponse {
-        logger.debug { "Received Event: \n $event" }
+        logger.info { "Received Event: \n $event" }
         val response: PichuParkingAPIResponse = when (event?.context?.httpMethod) {
             "GET" -> handleGetRequests(event)
             else -> {
-                throw IllegalArgumentException("invalid http method or not configured")
+                throw IllegalArgumentException("invalid http method or not configured ${event?.context?.httpMethod}")
             }
         }
         return response
