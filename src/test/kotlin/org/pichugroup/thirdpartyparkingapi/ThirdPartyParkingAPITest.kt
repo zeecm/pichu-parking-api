@@ -105,7 +105,7 @@ class URAParkingAPITest {
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
             }
-            val api = URAParkingAPI(engine = mockEngine, apiKey = uraAccessKey)
+            val api = URAParkingAPIClient(engine = mockEngine, apiKey = uraAccessKey)
             val token = api.getToken()
             assertEquals("mocked_token", token)
         }
@@ -115,8 +115,8 @@ class URAParkingAPITest {
     fun testGetParkingLots() {
         runBlocking {
             val expectedCarparkIDs = setOf("N0006", "S0108")
-            val api = URAParkingAPI(engine = parkingLotMockEngine, apiKey = uraAccessKey)
-            val parkingLots: Set<PichuParkingData> = api.getParkingLots()
+            val api = URAParkingAPIClient(engine = parkingLotMockEngine, apiKey = uraAccessKey)
+            val parkingLots: Set<PichuParkingLots> = api.getParkingLots()
             val parkingLotIDs: Set<String> = parkingLots.map { it.carparkID }.toSet()
             assertEquals(expectedCarparkIDs, parkingLotIDs)
         }
@@ -134,7 +134,7 @@ class URAParkingAPITest {
     fun testGetParkingRates() {
         runBlocking {
             val expectedCarparkName = "ALIWAL STREET"
-            val api = URAParkingAPI(engine = parkingRatesMockEngine, apiKey = uraAccessKey)
+            val api = URAParkingAPIClient(engine = parkingRatesMockEngine, apiKey = uraAccessKey)
             val parkingRates: Set<PichuParkingRates> = api.getParkingRates()
             assertEquals(expectedCarparkName, parkingRates.elementAt(0).carparkName)
         }
@@ -178,8 +178,8 @@ class LTAParkingAPITest {
     @Test
     fun testGetParkingLots() {
         runBlocking {
-            val api = LTAParkingAPI(engine = parkingLotsMockEngine, apiKey = ltaAccountKey)
-            val parkingLots: Set<PichuParkingData> = api.getParkingLots()
+            val api = LTAParkingAPIClient(engine = parkingLotsMockEngine, apiKey = ltaAccountKey)
+            val parkingLots: Set<PichuParkingLots> = api.getParkingLots()
             val availableLots = parkingLots.map { it.availableLots }
             val expectedAvailableLots: List<Int> = listOf(1104)
             assertEquals(availableLots, expectedAvailableLots)

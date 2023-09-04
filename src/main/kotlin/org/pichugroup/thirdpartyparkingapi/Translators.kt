@@ -5,27 +5,27 @@ import org.pichugroup.svy21.LatLonCoordinate
 import org.pichugroup.svy21.SVY21
 import org.pichugroup.svy21.SVY21Coordinate
 
-fun translateURAParkingLotResponse(uraParkingLotResponse: URAParkingLotResponse): Set<PichuParkingData> {
+fun translateURAParkingLotResponse(uraParkingLotResponse: URAParkingLotResponse): Set<PichuParkingLots> {
     if (uraParkingLotResponse.status != "Success") {
         throw Exception("API Returned Invalid Data")
     }
 
     val parkingLots: List<URAParkingLotData> = uraParkingLotResponse.result
 
-    val finalList = mutableListOf<PichuParkingData>()
+    val finalList = mutableListOf<PichuParkingLots>()
 
     for (lotData in parkingLots) {
-        val pichuData: List<PichuParkingData> = translateURAParkingLotData(lotData)
+        val pichuData: List<PichuParkingLots> = translateURAParkingLotData(lotData)
         finalList.addAll(pichuData)
     }
 
     return finalList.toSet()
 }
 
-private fun translateURAParkingLotData(uraParkingLotData: URAParkingLotData): List<PichuParkingData> {
+private fun translateURAParkingLotData(uraParkingLotData: URAParkingLotData): List<PichuParkingLots> {
     val svy21 = SVY21()
 
-    val parkingData = mutableListOf<PichuParkingData>()
+    val parkingData = mutableListOf<PichuParkingLots>()
 
     val carparkID = uraParkingLotData.carparkNo
     val carparkName = ""
@@ -39,7 +39,7 @@ private fun translateURAParkingLotData(uraParkingLotData: URAParkingLotData): Li
         val latitude: Double = latLonCoordinate.latitude
         val longitude: Double = latLonCoordinate.longitude
         parkingData.add(
-            PichuParkingData(
+            PichuParkingLots(
                 carparkID = carparkID,
                 carparkName = carparkName,
                 vehicleCategory = vehicleCategory,
@@ -96,20 +96,20 @@ private fun translateURAParkingRatesData(uraParkingRatesData: URAParkingRatesDat
         val longitude: Double = latLonCoordinate.longitude
         ratesData.add(
             PichuParkingRates(
-                carparkID,
-                carparkName,
-                vehicleCategory,
-                latitude,
-                longitude,
-                parkingSystem,
-                capacity,
-                timeRange,
-                weekdayMin,
-                weekdayRate,
-                saturdayMin,
-                saturdayRate,
-                sundayPHMin,
-                sundayPHRate
+                carparkID = carparkID,
+                carparkName = carparkName,
+                vehicleCategory = vehicleCategory,
+                latitude = latitude,
+                longitude = longitude,
+                parkingSystem = parkingSystem,
+                capacity = capacity,
+                timeRange = timeRange,
+                weekdayMin = weekdayMin,
+                weekdayRate = weekdayRate,
+                saturdayMin = saturdayMin,
+                saturdayRate = saturdayRate,
+                sundayPHMin = sundayPHMin,
+                sundayPHRate = sundayPHRate,
             )
         )
     }
@@ -122,10 +122,10 @@ private fun splitURASvy21String(svy21String: String): SVY21Coordinate {
     return SVY21Coordinate(easting = svy21Easting, northing = svy21Northing)
 }
 
-fun translateLTAParkingAvailabilityResponse(ltaParkingLotResponse: LTAParkingAvailabilityResponse): Set<PichuParkingData> {
+fun translateLTAParkingAvailabilityResponse(ltaParkingLotResponse: LTAParkingAvailabilityResponse): Set<PichuParkingLots> {
     val parkingAvailability: List<LTAParkingAvailabilityData> = ltaParkingLotResponse.value
 
-    val finalList = mutableListOf<PichuParkingData>()
+    val finalList = mutableListOf<PichuParkingLots>()
 
     for (availabilityData in parkingAvailability) {
         val pichuData = translateLTAParkingAvailabilityData(availabilityData)
@@ -134,7 +134,7 @@ fun translateLTAParkingAvailabilityResponse(ltaParkingLotResponse: LTAParkingAva
     return finalList.toSet()
 }
 
-private fun translateLTAParkingAvailabilityData(ltaParkingAvailabilityData: LTAParkingAvailabilityData): PichuParkingData {
+private fun translateLTAParkingAvailabilityData(ltaParkingAvailabilityData: LTAParkingAvailabilityData): PichuParkingLots {
     val carparkID = ltaParkingAvailabilityData.carparkID
     val carparkName = ltaParkingAvailabilityData.development
     val latLonCoordinate: LatLonCoordinate = splitLTACoordinateString(ltaParkingAvailabilityData.location)
@@ -143,7 +143,7 @@ private fun translateLTAParkingAvailabilityData(ltaParkingAvailabilityData: LTAP
     val vehicleCategory = ltaParkingAvailabilityData.lotType
     val availableLots = ltaParkingAvailabilityData.availableLots
     val agency = ltaParkingAvailabilityData.agency
-    return PichuParkingData(
+    return PichuParkingLots(
         carparkID = carparkID,
         carparkName = carparkName,
         vehicleCategory = vehicleCategory,

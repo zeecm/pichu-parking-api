@@ -7,30 +7,38 @@ data class PichuParkingAPIResponse(
     @SerializedName("data") var data: Set<PichuParkingData>,
 )
 
-data class PichuParkingData(
-    @SerializedName("carparkID") var carparkID: String,
-    @SerializedName("carparkName") var carparkName: String,
-    @SerializedName("latitude") var latitude: Double,
-    @SerializedName("longitude") var longitude: Double,
-    @SerializedName("vehicleCategory") var vehicleCategory: String,
-    @SerializedName("availableLots") var availableLots: Int,
-    @SerializedName("agency") var agency: String,
-)
+sealed class PichuParkingData {
+    abstract val carparkID: String
+    abstract val carparkName: String
+    abstract val vehicleCategory: String
+    abstract val latitude: Double
+    abstract val longitude: Double
+}
+
+data class PichuParkingLots(
+    @SerializedName("carparkID") override val carparkID: String,
+    @SerializedName("carparkName") override val carparkName: String,
+    @SerializedName("latitude") override val latitude: Double,
+    @SerializedName("longitude") override val longitude: Double,
+    @SerializedName("vehicleCategory") override val vehicleCategory: String,
+    @SerializedName("availableLots") val availableLots: Int,
+    @SerializedName("agency") val agency: String
+) : PichuParkingData()
 
 data class PichuParkingRates(
-    @SerializedName("carparkID") var carparkID: String,
-    @SerializedName("carparkName") var carparkName: String,
-    @SerializedName("vehicleCategory") var vehicleCategory: String,
-    @SerializedName("latitude") var latitude: Double,
-    @SerializedName("longitude") var longitude: Double,
-    @SerializedName("parkingSystem") var parkingSystem: String,
-    @SerializedName("capacity") var capacity: Int,
-    @SerializedName("timeRange") var timeRange: String,
-    @SerializedName("weekdayMin") var weekdayMin: String,
-    @SerializedName("weekdayRate") var weekdayRate: String,
-    @SerializedName("saturdayMin") var saturdayMin: String,
-    @SerializedName("saturdayRate") var saturdayRate: String,
-    @SerializedName("sundayPHMin") var sundayPHMin: String,
-    @SerializedName("sundayPHRate") var sundayPHRate: String,
-)
+    @SerializedName("carparkID") override val carparkID: String,
+    @SerializedName("carparkName") override val carparkName: String,
+    @SerializedName("latitude") override val latitude: Double,
+    @SerializedName("longitude") override val longitude: Double,
+    @SerializedName("vehicleCategory") override val vehicleCategory: String,
+    @SerializedName("parkingSystem") val parkingSystem: String,
+    @SerializedName("capacity") val capacity: Int,
+    @SerializedName("timeRange") val timeRange: String,
+    @SerializedName("weekdayMin") val weekdayMin: String,
+    @SerializedName("weekdayRate") val weekdayRate: String,
+    @SerializedName("saturdayMin") val saturdayMin: String,
+    @SerializedName("saturdayRate") val saturdayRate: String,
+    @SerializedName("sundayPHMin") val sundayPHMin: String,
+    @SerializedName("sundayPHRate") val sundayPHRate: String
+) : PichuParkingData()
 
