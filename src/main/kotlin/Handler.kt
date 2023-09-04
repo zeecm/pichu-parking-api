@@ -34,15 +34,9 @@ class PichuHandler {
 
 data class APIGatewayEventPayload(
     var body: Map<String, String> = emptyMap(),
-    var params: Parameters = Parameters(),
+    var params: Map<String, Map<String, String>> = emptyMap(),
     var stageVariables: Map<String, String> = emptyMap(),
     var context: APIGatewayEventContext = APIGatewayEventContext(),
-)
-
-data class Parameters(
-    var path: Map<String, String> = emptyMap(),
-    var queryString: Map<String, String> = emptyMap(),
-    var header: Map<String, String> = emptyMap(),
 )
 
 data class APIGatewayEventContext(
