@@ -5,6 +5,7 @@ import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.runBlocking
 import org.pichugroup.schema.PichuParkingAPIResponse
 import org.pichugroup.schema.PichuParkingLots
+import org.pichugroup.schema.PichuParkingRates
 import org.pichugroup.thirdpartyparkingapi.*
 import java.time.LocalDateTime
 
@@ -67,11 +68,11 @@ class PichuParkingAPI(private val thirdPartyAPIsToUse: Set<ThirdPartyParkingAPI>
 
     fun getParkingRates(): PichuParkingAPIResponse {
         val currentTime = LocalDateTime.now().toString()
-        val parkingRatesData: MutableSet<PichuParkingLots> = mutableSetOf()
+        val parkingRatesData: MutableSet<PichuParkingRates> = mutableSetOf()
 
         for (api in instantiatedAPIs) {
             runBlocking {
-                val data: Set<PichuParkingLots> = api.getParkingLots()
+                val data: Set<PichuParkingRates> = api.getParkingRates()
                 parkingRatesData.addAll(data)
             }
         }

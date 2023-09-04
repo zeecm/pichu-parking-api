@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import org.junit.jupiter.api.Test
 import org.pichugroup.schema.PichuParkingAPIResponse
 import org.pichugroup.schema.PichuParkingLots
+import org.pichugroup.schema.PichuParkingRates
 
 class HandlerTest {
     private val handler = PichuHandler()
@@ -14,63 +15,63 @@ class HandlerTest {
     companion object {
         const val parkingLotsPayloadString = """
                                         {
-                                            "body-json": {},
+                                            "body": {},
                                             "params": {
                                                 "path": {},
-                                                "querystring": {},
+                                                "queryString": {},
                                                 "header": {}
                                             },
-                                            "stage-variables": {},
+                                            "stage-stageVariables": {},
                                             "context": {
-                                                "account-id": "your-account-id",
-                                                "api-id": "your-api-id",
-                                                "api-key": "your-api-key",
-                                                "authorizer-principal-id": "your-principal-id",
-                                                "caller": "your-caller",
-                                                "cognito-authentication-provider": "cognito-auth-provider",
-                                                "cognito-authentication-type": "cognito-auth-type",
-                                                "cognito-identity-id": "cognito-identity-id",
-                                                "cognito-identity-pool-id": "cognito-identity-pool-id",
-                                                "http-method": "GET",
-                                                "stage": "your-stage",
-                                                "source-ip": "source-ip",
-                                                "user": "user",
-                                                "user-agent": "user-agent",
-                                                "user-arn": "user-arn",
-                                                "request-id": "request-id",
-                                                "resource-id": "your-resource-id",
-                                                "resource-path": "/parking-lots"
+                                                "accountId" : "186157170780",
+                                                "apiId" : "q7p4ehtedd",
+                                                "apiKey" : "test-invoke-api-key",
+                                                "authorizerPrincipalId" : "",
+                                                "caller" : "186157170780",
+                                                "cognitoAuthenticationProvider" : "",
+                                                "cognitoAuthenticationType" : "",
+                                                "cognitoIdentityId" : "",
+                                                "cognitoIdentityPoolId" : "",
+                                                "httpMethod" : "GET",
+                                                "stage" : "test-invoke-stage",
+                                                "sourceIp" : "test-invoke-source-ip",
+                                                "user" : "186157170780",
+                                                "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69",
+                                                "userArn" : "arn:aws:iam::186157170780:root",
+                                                "requestId" : "f9a436db-3b3b-4d25-95b8-cadf929a4e4b",
+                                                "resourceId" : "zv3nht",
+                                                "resourcePath": "/parking-lots"
                                             }
                                         }
                                         """
         const val parkingRatesPayloadString = """
                                         {
-                                            "body-json": {},
+                                            "body": {},
                                             "params": {
                                                 "path": {},
-                                                "querystring": {},
+                                                "queryString": {},
                                                 "header": {}
                                             },
-                                            "stage-variables": {},
+                                            "stage-stageVariables": {},
                                             "context": {
-                                                "account-id": "your-account-id",
-                                                "api-id": "your-api-id",
-                                                "api-key": "your-api-key",
-                                                "authorizer-principal-id": "your-principal-id",
-                                                "caller": "your-caller",
-                                                "cognito-authentication-provider": "cognito-auth-provider",
-                                                "cognito-authentication-type": "cognito-auth-type",
-                                                "cognito-identity-id": "cognito-identity-id",
-                                                "cognito-identity-pool-id": "cognito-identity-pool-id",
-                                                "http-method": "GET",
-                                                "stage": "your-stage",
-                                                "source-ip": "source-ip",
-                                                "user": "user",
-                                                "user-agent": "user-agent",
-                                                "user-arn": "user-arn",
-                                                "request-id": "request-id",
-                                                "resource-id": "your-resource-id",
-                                                "resource-path": "/parking-rates"
+                                                "accountId" : "186157170780",
+                                                "apiId" : "q7p4ehtedd",
+                                                "apiKey" : "test-invoke-api-key",
+                                                "authorizerPrincipalId" : "",
+                                                "caller" : "186157170780",
+                                                "cognitoAuthenticationProvider" : "",
+                                                "cognitoAuthenticationType" : "",
+                                                "cognitoIdentityId" : "",
+                                                "cognitoIdentityPoolId" : "",
+                                                "httpMethod" : "GET",
+                                                "stage" : "test-invoke-stage",
+                                                "sourceIp" : "test-invoke-source-ip",
+                                                "user" : "186157170780",
+                                                "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69",
+                                                "userArn" : "arn:aws:iam::186157170780:root",
+                                                "requestId" : "f9a436db-3b3b-4d25-95b8-cadf929a4e4b",
+                                                "resourceId" : "zv3nht",
+                                                "resourcePath": "/parking-rates"
                                             }
                                         }
                                         """
@@ -87,6 +88,6 @@ class HandlerTest {
     fun testGetRequestParkingRates() {
         val eventPayload = gson.fromJson(parkingRatesPayloadString, APIGatewayEventPayload::class.java)
         val response: PichuParkingAPIResponse = handler.handleRequest(event = eventPayload)
-        assert(response.data.elementAt(0) is PichuParkingLots)
+        assert(response.data.elementAt(0) is PichuParkingRates)
     }
 }

@@ -1,4 +1,5 @@
 import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler
 import com.google.gson.annotations.SerializedName
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.pichugroup.pichuparkingapi.PichuParkingAPI
@@ -32,35 +33,35 @@ class PichuHandler {
 }
 
 data class APIGatewayEventPayload(
-    @SerializedName("body-json") var body: Map<String, String> = emptyMap(),
-    @SerializedName("params") var params: Parameters = Parameters(),
-    @SerializedName("stage-variables") var stageVariables: Map<String, String> = emptyMap(),
-    @SerializedName("context") var context: APIGatewayEventContext = APIGatewayEventContext(),
+    var body: Map<String, String> = emptyMap(),
+    var params: Parameters = Parameters(),
+    var stageVariables: Map<String, String> = emptyMap(),
+    var context: APIGatewayEventContext = APIGatewayEventContext(),
 )
 
 data class Parameters(
-    @SerializedName("path") var path: Map<String, String> = emptyMap(),
-    @SerializedName("querystring") var queryString: Map<String, String> = emptyMap(),
-    @SerializedName("header") var header: Map<String, String> = emptyMap(),
+    var path: Map<String, String> = emptyMap(),
+    var queryString: Map<String, String> = emptyMap(),
+    var header: Map<String, String> = emptyMap(),
 )
 
 data class APIGatewayEventContext(
-    @SerializedName("account-id") var accountId: String = "",
-    @SerializedName("api-id") var apiId: String = "",
-    @SerializedName("api-key") var apiKey: String = "",
-    @SerializedName("authorizer-principal-id") var authorizerPrincipalId: String = "",
-    @SerializedName("caller") var caller: String = "",
-    @SerializedName("cognito-authentication-provider") var cognitoAuthenticationProvider: String = "",
-    @SerializedName("cognito-authentication-type") var cognitoAuthenticationType: String = "",
-    @SerializedName("cognito-identity-id") var cognitoIdentityId: String = "",
-    @SerializedName("cognito-identity-pool-id") var cognitoIdentityPoolId: String = "",
-    @SerializedName("http-method") var httpMethod: String = "",
-    @SerializedName("stage") var stage: String = "",
-    @SerializedName("source-ip") var sourceIp: String = "",
-    @SerializedName("user") var user: String = "",
-    @SerializedName("user-agent") var userAgent: String = "",
-    @SerializedName("user-arn") var userArn: String = "",
-    @SerializedName("request-id") var requestId: String = "",
-    @SerializedName("resource-id") var resourceId: String = "",
-    @SerializedName("resource-path") var resourcePath: String = "",
+    var accountId: String = "",
+    var apiId: String = "",
+    var apiKey: String = "",
+    var authorizerPrincipalId: String = "",
+    var caller: String = "",
+    var cognitoAuthenticationProvider: String = "",
+    var cognitoAuthenticationType: String = "",
+    var cognitoIdentityId: String = "",
+    var cognitoIdentityPoolId: String = "",
+    var httpMethod: String = "",
+    var stage: String = "",
+    var sourceIp: String = "",
+    var user: String = "",
+    var userAgent: String = "",
+    var userArn: String = "",
+    var requestId: String = "",
+    var resourceId: String = "",
+    var resourcePath: String = "",
 )
